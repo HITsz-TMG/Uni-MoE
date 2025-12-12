@@ -42,7 +42,6 @@ Uni-MoE is a MoE-based omnimodal large model and can understand and generate omn
 
 - [2024/5/31] 🔥 The checkpoint of Uni-MoE with 8 experts is now available for downloading and inference. For more details, please refer to the [Uni_MoE_8e](https://github.com/HITsz-TMG/UMOE-Scaling-Unified-Multimodal-LLMs/blob/master/Uni_MoE/Uni_MoE_8e/README.md#%EF%B8%8F-uni-moe-weights) table. 
 - [2024/4/28] 🔥 We have upgraded the Uni-MoE codebase to facilitate training across multiple Nodes and GPUs. Explore this enhanced functionality in our revamped [fine-tuning script](https://github.com/HITsz-TMG/UMOE-Scaling-Unified-Multimodal-LLMs/blob/master/Uni_MoE/finetune_speech_dp.sh). Additionally, we have introduced a version that integrates distributed MoE modules. This enhancement allows for training our model with parallel processing at both the expert and modality levels, enhancing efficiency and scalability. For more details, please refer to the [Uni_MoE_1.0 with 8 experts](https://github.com/HITsz-TMG/Uni-MoE/tree/master/Uni_MoE/Uni_MoE_8e) documentation. 
-- [2024/3/7] 🔥 We released **Uni-MOE: Scaling Unified Multimodal LLMs with Mixture of Experts**. We proposed the development of a unified Multimodal LLM (MLLM) utilizing the MoE framework, which can process diverse modalities, including audio, image, text, and video.  Checkout the [paper](https://arxiv.org/abs/2405.11273) and [demo](https://github.com/HITsz-TMG/UMOE-Scaling-Unified-Multimodal-LLMs/tree/master?tab=readme-ov-file#-demo-video).
 
 
 ## 📀 Demo Video
