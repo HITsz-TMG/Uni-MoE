@@ -36,7 +36,7 @@ Uni-MoE is a MoE-based omnimodal large model and can understand and generate omn
 
 - [2025/8/6] 🔥 We release a better Uni-MoE v1.5 at modelscope [here](https://www.modelscope.cn/models/victorjsyy/Uni-MoE) with a unified speech encoding approach.
 
-- [2025/1/9]  🔥 Our paper has been accepted by **IEEE Transactions on Pattern Analysis and Machine Intelligence (TPAMI)**, 2025.
+- [2025/2/20]  🔥 Our paper has been accepted by **IEEE Transactions on Pattern Analysis and Machine Intelligence (TPAMI)**, 2025.
 
 - [2024/8/28] 🔥 We release our video evaluation benchmark [VideoVista](https://videovista.github.io/) and the automatically generated video instruction tuning data [VideoVista-Train](https://huggingface.co/datasets/Uni-MoE/VideoVista_Train).
 
