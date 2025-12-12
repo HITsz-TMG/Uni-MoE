@@ -50,7 +50,7 @@ Uni-MoE is a MoE-based omnimodal large model and can understand and generate omn
 
 https://github.com/user-attachments/assets/5e5ca44b-a39f-49bf-afca-78c73b7657ed
 
-### 👀 UniMoE-Audio
+### 👀 Uni-MoE-Audio
 
 
 <div align="center">
@@ -78,9 +78,9 @@ We present Uni-MoE 2.0 from the Lychee family. As a fully open-source omnimodal 
 
 
 
-### 🚀 UniMoE-Audio
+### 🚀 Uni-MoE-Audio
 
-UniMoE-Audio introduces a dynamic-capacity routing mechanism based on Top-P sampling for adaptive expert allocation, together with a hybrid expert design that separates domain-specific computation (dynamic experts) from universal representations (shared experts). To address data imbalance and task conflicts, UniMoE-Audio adopts a structured three-stage training curriculum. From voice cloning and text-to-speech (TTS) to text-to-music (T2M) and video-to-music (V2M), UniMoE-Audio supports diverse creative workflows. Extensive experiments confirm its state-of-the-art performance and superior cross-task synergy, paving the way toward universal audio generation.
+Uni-MoE-Audio introduces a dynamic-capacity routing mechanism based on Top-P sampling for adaptive expert allocation, together with a hybrid expert design that separates domain-specific computation (dynamic experts) from universal representations (shared experts). To address data imbalance and task conflicts, Uni-MoE-Audio adopts a structured three-stage training curriculum. From voice cloning and text-to-speech (TTS) to text-to-music (T2M) and video-to-music (V2M), Uni-MoE-Audio supports diverse creative workflows. Extensive experiments confirm its state-of-the-art performance and superior cross-task synergy, paving the way toward universal audio generation.
 
 <div align=center><img src="https://github.com/HITsz-TMG/Uni-MoE/blob/master/UniMoE-Audio/assets/img/AudioLLM_model-MoE.png" height="100%" width="75%"/></div>
 
