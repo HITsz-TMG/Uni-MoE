@@ -32,7 +32,7 @@ Uni-MoE is a MoE-based omnimodal large model and can understand and generate omn
 
 - [2025/11/13] 🔥 We release the second version of [Uni-MoE-2.0-Omni](https://github.com/HITsz-TMG/Uni-MoE/tree/master/Uni-MoE-2). It achieves a significant leap in language-centric multimodal understanding, reasoning, and generation capabilities, while efficiently supporting cross-modal interactions across ten-plus modalities such as images, text, and speech through its dynamic MoE architecture and progressive training strategy.
   
-- [2025/10/16] 🔥 We release a better [UniMoE-Audio](https://github.com/HITsz-TMG/Uni-MoE/tree/master/UniMoE-Audio), the first audio generation model with a unified speech and music generation.
+- [2025/10/16] 🔥 We release a better [Uni-MoE-Audio](https://github.com/HITsz-TMG/Uni-MoE/tree/master/UniMoE-Audio), the first audio generation model with a unified speech and music generation.
 
 - [2025/8/6] 🔥 We release a better Uni-MoE v1.5 at modelscope [here](https://www.modelscope.cn/models/victorjsyy/Uni-MoE) with a unified speech encoding approach.
 
