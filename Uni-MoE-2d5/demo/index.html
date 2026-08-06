@@ -1,0 +1,364 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>UniMoE-2.5 全模态推理</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f4f6f8;
+      --panel: #fff;
+      --line: #d9dfe7;
+      --ink: #17202a;
+      --muted: #667085;
+      --accent: #c96b18;
+      --accent-dark: #a94f08;
+      --accent-soft: #fff2e6;
+      --ok: #16803b;
+      --bad: #c52b2b;
+      --radius: 12px;
+      --sans: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      display: grid;
+      grid-template-rows: auto auto 1fr auto;
+      background: var(--bg);
+      color: var(--ink);
+      font: 15px/1.6 var(--sans);
+    }
+    header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 18px;
+      background: var(--panel);
+      border-bottom: 1px solid var(--line);
+    }
+    .brand { display: flex; align-items: baseline; gap: 10px; min-width: 0; }
+    .brand strong { font-size: 14px; letter-spacing: .03em; }
+    .brand span { color: var(--muted); font: 11px var(--mono); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .grow { flex: 1; }
+    .status { display: flex; align-items: center; gap: 7px; color: var(--muted); font: 11px var(--mono); }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: #98a2b3; }
+    .dot.ok { background: var(--ok); box-shadow: 0 0 0 3px rgba(22,128,59,.13); }
+    .dot.bad { background: var(--bad); box-shadow: 0 0 0 3px rgba(197,43,43,.12); }
+    button { font: inherit; }
+    .icon {
+      width: 36px; height: 36px; display: inline-grid; place-items: center;
+      border: 1px solid var(--line); border-radius: 9px; background: #f8fafc;
+      color: #475467; cursor: pointer;
+    }
+    .icon:hover { border-color: #98a2b3; color: var(--ink); }
+    .icon svg { width: 18px; height: 18px; }
+    .settings {
+      display: none; flex-wrap: wrap; gap: 14px 18px; align-items: end;
+      padding: 12px 18px; background: var(--panel); border-bottom: 1px solid var(--line);
+    }
+    .settings.open { display: flex; }
+    .field { display: grid; gap: 4px; }
+    .field label { color: var(--muted); font: 10px var(--mono); letter-spacing: .04em; text-transform: uppercase; }
+    .field input {
+      width: 120px; padding: 7px 9px; border: 1px solid var(--line); border-radius: 8px;
+      background: #fbfcfd; color: var(--ink); font: 13px var(--mono);
+    }
+    main { overflow: auto; }
+    .thread { width: min(880px, 100%); margin: auto; padding: 26px 18px 38px; }
+    .empty { max-width: 570px; margin: 12vh auto 0; text-align: center; color: var(--muted); }
+    .empty .eyebrow { color: var(--accent); font: 11px var(--mono); letter-spacing: .18em; text-transform: uppercase; }
+    .empty h1 { margin: 14px 0 8px; color: var(--ink); font-size: 23px; line-height: 1.3; }
+    .empty p { margin: 0; }
+    .message { display: grid; grid-template-columns: 42px minmax(0, 1fr); gap: 12px; margin: 0 0 26px; }
+    .avatar {
+      width: 34px; height: 34px; display: grid; place-items: center; border-radius: 9px;
+      background: #e8edf3; color: #475467; font: 11px var(--mono); font-weight: 700;
+    }
+    .message.assistant .avatar { background: var(--accent-soft); color: var(--accent-dark); }
+    .meta { margin-bottom: 5px; color: var(--muted); font: 11px var(--mono); }
+    .bubble { white-space: pre-wrap; word-break: break-word; }
+    .message.user .bubble { color: #344054; }
+    .media-preview { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0; }
+    .media-preview img, .media-preview video { width: min(260px, 100%); max-height: 210px; object-fit: contain; border: 1px solid var(--line); border-radius: 9px; background: #fff; }
+    .media-preview audio { width: min(360px, 100%); }
+    .cursor::after { content: ""; display: inline-block; width: 7px; height: 1em; margin-left: 3px; background: var(--accent); vertical-align: -.15em; animation: blink 1s step-end infinite; }
+    @keyframes blink { 50% { opacity: 0; } }
+    footer { padding: 0 16px 16px; background: linear-gradient(transparent, var(--bg) 22%); }
+    .composer {
+      width: min(880px, 100%); margin: auto; padding: 10px;
+      background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
+      box-shadow: 0 10px 28px rgba(16,24,40,.08);
+    }
+    .attachments { display: none; flex-wrap: wrap; gap: 7px; padding: 2px 2px 9px; }
+    .attachments.show { display: flex; }
+    .filechip { display: flex; align-items: center; gap: 7px; max-width: 230px; padding: 5px 7px 5px 9px; border: 1px solid var(--line); border-radius: 8px; background: #f8fafc; color: #475467; font: 11px var(--mono); }
+    .filechip span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .filechip button { border: 0; background: transparent; color: var(--muted); cursor: pointer; padding: 0 2px; }
+    .compose-row { display: grid; grid-template-columns: auto 1fr auto; gap: 8px; align-items: end; }
+    .tools { display: flex; gap: 6px; }
+    textarea { width: 100%; max-height: 170px; resize: none; border: 0; outline: 0; padding: 7px 5px; color: var(--ink); background: transparent; font: 15px/1.5 var(--sans); }
+    .send { width: 38px; height: 38px; border: 0; border-radius: 10px; background: var(--accent); color: white; cursor: pointer; display: grid; place-items: center; }
+    .send:hover { background: var(--accent-dark); }
+    .send:disabled { cursor: not-allowed; opacity: .45; }
+    .send svg { width: 18px; height: 18px; }
+    .stop { display: none; background: var(--bad); }
+    .hint { width: min(880px, 100%); margin: 6px auto 0; text-align: center; color: var(--muted); font: 10px var(--mono); }
+    .toast { position: fixed; left: 50%; bottom: 24px; transform: translate(-50%, 10px); opacity: 0; pointer-events: none; padding: 9px 14px; border-radius: 8px; background: #182230; color: #fff; font-size: 12px; transition: .18s; }
+    .toast.show { opacity: .96; transform: translate(-50%, 0); }
+    @media (max-width: 680px) {
+      header { padding-inline: 12px; }
+      .brand span { display: none; }
+      .status span:last-child { display: none; }
+      .thread { padding-inline: 13px; }
+      footer { padding-inline: 8px; }
+      .tools { gap: 3px; }
+      .icon { width: 34px; height: 34px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand"><strong>UniMoE-2.5 全模态推理</strong><span id="modelName">model: loading</span></div>
+    <div class="grow"></div>
+    <div class="status"><i class="dot" id="statusDot"></i><span id="statusText">连接中</span></div>
+    <button class="icon" id="settingsBtn" title="生成参数" aria-label="生成参数">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.85l.05.05a2 2 0 1 1-2.83 2.83l-.05-.05a1.7 1.7 0 0 0-2.9 1.2V21a2 2 0 0 1-4 0v-.08a1.7 1.7 0 0 0-2.9-1.2l-.05.05a2 2 0 1 1-2.83-2.83l.05-.05A1.7 1.7 0 0 0 3.08 14H3a2 2 0 0 1 0-4h.08a1.7 1.7 0 0 0 1.2-2.9l-.05-.05a2 2 0 1 1 2.83-2.83l.05.05A1.7 1.7 0 0 0 10 3.08V3a2 2 0 0 1 4 0v.08a1.7 1.7 0 0 0 2.9 1.2l.05-.05a2 2 0 1 1 2.83 2.83l-.05.05A1.7 1.7 0 0 0 20.92 10H21a2 2 0 0 1 0 4h-.08A1.7 1.7 0 0 0 19.4 15z"/></svg>
+    </button>
+    <button class="icon" id="clearBtn" title="清空对话" aria-label="清空对话">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18M8 6V4h8v2m3 0-1 15H6L5 6m4 4v7m6-7v7"/></svg>
+    </button>
+  </header>
+
+  <section class="settings" id="settings">
+    <div class="field"><label for="temperature">Temperature</label><input id="temperature" type="number" min="0" max="2" step="0.1" value="0"></div>
+    <div class="field"><label for="maxTokens">Max tokens</label><input id="maxTokens" type="number" min="1" step="64" value="512"></div>
+    <div class="field"><label for="repetitionPenalty">Repetition penalty</label><input id="repetitionPenalty" type="number" min="0.01" max="2" step="0.01" value="1.05"></div>
+    <div class="field"><label for="frequencyPenalty">Frequency penalty</label><input id="frequencyPenalty" type="number" min="-2" max="2" step="0.1" value="0"></div>
+    <div class="field"><label for="fps">Video FPS</label><input id="fps" type="number" min="0.1" max="30" step="0.5" value="2"></div>
+  </section>
+
+  <main id="main">
+    <div class="thread" id="thread">
+      <section class="empty" id="empty">
+        <div class="eyebrow">UniMoE-2.5 · Ascend</div>
+        <h1>文本、图像、音频与视频推理</h1>
+        <p>输入问题，并按需添加一种或多种媒体文件。</p>
+      </section>
+    </div>
+  </main>
+
+  <footer>
+    <div class="composer">
+      <div class="attachments" id="attachments"></div>
+      <div class="compose-row">
+        <div class="tools">
+          <button class="icon" data-pick="image" title="添加图片" aria-label="添加图片"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg></button>
+          <button class="icon" data-pick="audio" title="添加音频" aria-label="添加音频"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 10v4M7 6v12M11 3v18M15 7v10M19 10v4"/></svg></button>
+          <button class="icon" data-pick="video" title="添加视频" aria-label="添加视频"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="5" width="14" height="14" rx="2"/><path d="m22 8-6 4 6 4V8z"/></svg></button>
+        </div>
+        <textarea id="prompt" rows="1" placeholder="输入消息，可附带图片 / 音频 / 视频…"></textarea>
+        <button class="send" id="sendBtn" title="发送" aria-label="发送"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
+        <button class="send stop" id="stopBtn" title="停止" aria-label="停止"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg></button>
+      </div>
+    </div>
+    <div class="hint" id="hint">同一服务进程负责页面和 vLLM 流式转发</div>
+  </footer>
+
+  <input id="imageInput" type="file" accept="image/*" multiple hidden>
+  <input id="audioInput" type="file" accept="audio/*" multiple hidden>
+  <input id="videoInput" type="file" accept="video/*" multiple hidden>
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const $ = id => document.getElementById(id);
+    const state = { files: [], history: [], controller: null, config: null };
+
+    function toast(message) {
+      $("toast").textContent = message;
+      $("toast").classList.add("show");
+      clearTimeout(toast.timer);
+      toast.timer = setTimeout(() => $("toast").classList.remove("show"), 2600);
+    }
+
+    function scrollEnd() { $("main").scrollTo({ top: $("main").scrollHeight, behavior: "smooth" }); }
+
+    function addMessage(role, text, files = []) {
+      $("empty").style.display = "none";
+      const row = document.createElement("article");
+      row.className = `message ${role}`;
+      const avatar = document.createElement("div");
+      avatar.className = "avatar";
+      avatar.textContent = role === "assistant" ? "MoE" : "YOU";
+      const content = document.createElement("div");
+      const meta = document.createElement("div");
+      meta.className = "meta";
+      meta.textContent = role === "assistant" ? "UniMoE-2.5" : "用户";
+      const previews = document.createElement("div");
+      previews.className = "media-preview";
+      for (const file of files) {
+        const url = URL.createObjectURL(file);
+        let element;
+        if (file.type.startsWith("image/")) element = document.createElement("img");
+        else if (file.type.startsWith("audio/")) { element = document.createElement("audio"); element.controls = true; }
+        else if (file.type.startsWith("video/")) { element = document.createElement("video"); element.controls = true; }
+        if (element) { element.src = url; previews.appendChild(element); }
+      }
+      const bubble = document.createElement("div");
+      bubble.className = "bubble";
+      bubble.textContent = text;
+      content.append(meta, previews, bubble);
+      row.append(avatar, content);
+      $("thread").appendChild(row);
+      scrollEnd();
+      return bubble;
+    }
+
+    function renderFiles() {
+      const rail = $("attachments");
+      rail.replaceChildren();
+      rail.classList.toggle("show", state.files.length > 0);
+      state.files.forEach((file, index) => {
+        const chip = document.createElement("div");
+        chip.className = "filechip";
+        const label = document.createElement("span");
+        label.textContent = file.name;
+        const remove = document.createElement("button");
+        remove.type = "button";
+        remove.textContent = "×";
+        remove.onclick = () => { state.files.splice(index, 1); renderFiles(); };
+        chip.append(label, remove);
+        rail.appendChild(chip);
+      });
+    }
+
+    function addPicked(files) {
+      state.files.push(...files);
+      renderFiles();
+    }
+
+    async function loadConfig() {
+      try {
+        const response = await fetch("/api/config");
+        state.config = await response.json();
+        $("modelName").textContent = state.config.label;
+        $("maxTokens").max = state.config.max_output_tokens;
+        $("hint").textContent = `文件上限：图片 ${state.config.limits_mb.image} MiB · 音频 ${state.config.limits_mb.audio} MiB · 视频 ${state.config.limits_mb.video} MiB`;
+      } catch (error) { toast(`配置加载失败：${error}`); }
+    }
+
+    async function health() {
+      try {
+        const response = await fetch("/healthz", { cache: "no-store" });
+        const data = await response.json();
+        $("statusDot").className = `dot ${response.ok && data.ok ? "ok" : "bad"}`;
+        $("statusText").textContent = response.ok && data.ok ? "在线" : "vLLM 不可达";
+      } catch (_) {
+        $("statusDot").className = "dot bad";
+        $("statusText").textContent = "vLLM 不可达";
+      }
+    }
+
+    function setRunning(running) {
+      $("sendBtn").style.display = running ? "none" : "grid";
+      $("stopBtn").style.display = running ? "grid" : "none";
+      $("prompt").disabled = running;
+    }
+
+    async function send() {
+      const text = $("prompt").value.trim();
+      if (!text && state.files.length === 0) return toast("请输入文字或添加媒体文件");
+      const requestFiles = [...state.files];
+      const userHistoryText = `${requestFiles.length ? `[${requestFiles.length} 个媒体文件] ` : ""}${text}`.trim();
+      addMessage("user", text || "（媒体输入）", requestFiles);
+      $("prompt").value = "";
+      $("prompt").style.height = "auto";
+      state.files = [];
+      renderFiles();
+
+      const assistant = addMessage("assistant", "");
+      assistant.classList.add("cursor");
+      const form = new FormData();
+      form.set("text", text);
+      form.set("history", JSON.stringify(state.history));
+      form.set("temperature", $("temperature").value);
+      form.set("max_tokens", $("maxTokens").value);
+      form.set("repetition_penalty", $("repetitionPenalty").value);
+      form.set("frequency_penalty", $("frequencyPenalty").value);
+      form.set("fps", $("fps").value);
+      requestFiles.forEach(file => form.append("files", file, file.name));
+
+      state.controller = new AbortController();
+      setRunning(true);
+      let answer = "";
+      try {
+        const response = await fetch("/api/chat", { method: "POST", body: form, signal: state.controller.signal });
+        if (!response.ok) {
+          const detail = await response.json().catch(() => ({}));
+          throw new Error(detail.detail || `HTTP ${response.status}`);
+        }
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = "";
+        while (true) {
+          const { value, done } = await reader.read();
+          buffer += decoder.decode(value || new Uint8Array(), { stream: !done });
+          const lines = buffer.split(/\r?\n/);
+          buffer = lines.pop() || "";
+          for (const line of lines) {
+            if (!line.startsWith("data:")) continue;
+            const data = line.slice(5).trim();
+            if (!data || data === "[DONE]") continue;
+            const event = JSON.parse(data);
+            if (event.error) throw new Error(event.error.message || String(event.error));
+            const delta = event.choices?.[0]?.delta?.content;
+            if (typeof delta === "string") {
+              answer += delta;
+              assistant.textContent = answer;
+              scrollEnd();
+            }
+          }
+          if (done) break;
+        }
+        state.history.push({ role: "user", content: userHistoryText || "（媒体输入）" });
+        state.history.push({ role: "assistant", content: answer });
+      } catch (error) {
+        if (error.name === "AbortError") assistant.textContent = `${answer}\n\n[已停止]`;
+        else { assistant.textContent = `${answer}\n\n[错误] ${error.message}`.trim(); toast(error.message); }
+      } finally {
+        assistant.classList.remove("cursor");
+        state.controller = null;
+        setRunning(false);
+      }
+    }
+
+    document.querySelectorAll("[data-pick]").forEach(button => {
+      button.onclick = () => $(`${button.dataset.pick}Input`).click();
+    });
+    ["image", "audio", "video"].forEach(kind => {
+      $(`${kind}Input`).onchange = event => { addPicked([...event.target.files]); event.target.value = ""; };
+    });
+    $("settingsBtn").onclick = () => $("settings").classList.toggle("open");
+    $("clearBtn").onclick = () => {
+      state.history = [];
+      [...$("thread").children].forEach(node => { if (node.id !== "empty") node.remove(); });
+      $("empty").style.display = "block";
+    };
+    $("sendBtn").onclick = send;
+    $("stopBtn").onclick = () => state.controller?.abort();
+    $("prompt").oninput = event => {
+      event.target.style.height = "auto";
+      event.target.style.height = `${Math.min(event.target.scrollHeight, 170)}px`;
+    };
+    $("prompt").onkeydown = event => {
+      if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); send(); }
+    };
+
+    loadConfig();
+    health();
+    setInterval(health, 15000);
+  </script>
+</body>
+</html>

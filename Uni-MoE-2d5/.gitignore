@@ -1,0 +1,38 @@
+__pycache__/
+*.py[cod]
+*.so
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+.venv/
+venv/
+build/
+dist/
+*.egg-info/
+.env
+.env.*
+!.env.example
+
+# Research preflight outputs are local navigation aids.
+x_temp/
+
+# Runtime and model artifacts must never be committed.
+*.log
+logs/
+outputs/
+results/
+checkpoints/
+weights/
+*.bin
+*.safetensors
+*.pt
+*.pth
+*.ckpt
+kernel_meta/
+fusion_result.json
+
+# Demo uploads and temporary media.
+demo/tmp/
+demo/uploads/
