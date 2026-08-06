@@ -247,7 +247,7 @@ python -m pip wheel . --no-deps --wheel-dir dist
 
 ## 开源边界
 
-本仓库只发布推理源码与 demo，不包含模型权重。
+本仓库只发布推理源码与 demo，模型权重发布于https://ai.gitcode.com/HIT-Lychee/Uni-MoE-2.5-Base。
 
 ## License
 
