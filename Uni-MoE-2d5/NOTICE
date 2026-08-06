@@ -1,0 +1,9 @@
+Uni-MoE-2.5 inference support
+
+This distribution contains code derived from vLLM, Qwen, and Hugging Face
+Transformers components. Individual source files retain their original
+copyright and Apache-2.0 notices where applicable.
+
+The UniMoE-2.5-specific integration and demo are distributed under the
+Apache License 2.0. Model weights are not included in this repository and
+may be governed by a separate model license.
