@@ -49,9 +49,9 @@ pip install -r env.txt
 
 To use our model, all weights should be downloaded.
 
-After downloading all of them, organize the weights as follows in 'Uni_MoE/checkpoint' folder:
+After downloading all of them, organize the weights as follows in 'Uni_MoE/checkpoints' folder:
 ```
-└── checkpoint
+└── checkpoints
     ├── Uni-MoE-audio-base
     ├── Uni-MoE-audio-e2
     ├── Uni-MoE-speech-base
