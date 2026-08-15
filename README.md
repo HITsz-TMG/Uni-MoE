@@ -98,7 +98,7 @@ The model architecture of Uni-MoE is shown below. Three training stages contain:
 
 ## 🙏 Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=HITsz-TMG/UMOE-Scaling-Unified-Multimodal-LLMs&type=Date)](https://star-history.com/#HITsz-TMG/UMOE-Scaling-Unified-Multimodal-LLMs&Date)
+[![Star History Chart](https://star-history.dera.page/svg?repos=HITsz-TMG/UMOE-Scaling-Unified-Multimodal-LLMs&type=Date)](https://star-history.dera.page/#HITsz-TMG/UMOE-Scaling-Unified-Multimodal-LLMs&type=Date)
 
 
 ## ❤️ Citation
